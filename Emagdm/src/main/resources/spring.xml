@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd 
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop-2.0.xsd 
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx-2.0.xsd 
+	http://www.springframework.org/schema/task 
+	http://www.springframework.org/schema/task/spring-task-3.1.xsd 
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<!-- <import resource="classpath:config/spring/spring-service.xml" /> -->
+
+	<!-- 数据库库连接配置  -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="username" value="sns" />
+		<property name="password" value="emagtestsns" />
+		<property name="url" value="jdbc:mysql://192.168.167.80:3306/RQST?Unicode=true&amp;characterEncoding=utf-8" />
+	</bean>
+
+	<!-- 开始mybatis的配置 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+	</bean>
+	<!-- -->
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory"></constructor-arg>
+	</bean>
+	<!-- 扫描dao下所有的接口，根据对应的mapper.xml为其生成代理类 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="cn.emagsoftware.dm.dao" />
+	</bean>
+	<!-- 结束mybatis配置 -->
+
+	<!-- 对数据源进行事务管理 -->
+	<bean name="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="delete*" propagation="REQUIRED" read-only="false"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="insert*" propagation="REQUIRED" read-only="false"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="update*" propagation="REQUIRED" read-only="false"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="save*" propagation="REQUIRED" read-only="false"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="*" propagation="REQUIRED" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config>
+		<aop:pointcut id="pc"
+			expression="execution(* cn.emagsoftware.dm.service..*(..))" />
+		<aop:advisor pointcut-ref="pc" advice-ref="txAdvice" />
+	</aop:config>
+
+
+	<!-- Configure to plugin JSON as request and response in method handler -->
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <ref bean="jsonMessageConverter"/>
+            </list>
+        </property>
+    </bean>
+    
+    <!-- Configure bean to convert JSON to POJO and vice versa -->
+	<bean id="jsonMessageConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+ 	</bean>
+ 	
+ 	<!--  这里申明的id必须为multipartResolver  -->  
+    <bean id="multipartResolver"  
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">  
+  
+        <!-- one of the properties available; the maximum file size in bytes -->  
+        <property name="maxUploadSize" value="5000000"/>  
+    </bean> 
+	
+	
+	<context:annotation-config />  
+	<context:component-scan   base-package="cn.emagsoftware.dm.service" /> 
+	<task:annotation-driven />   
+	
+	
+	
+	
+	<aop:aspectj-autoproxy proxy-target-class="true"/> 
+	<bean name="javaMailServiceImpl" class="cn.emagsoftware.dm.service.impl.JavaMailServiceImpl">
+		<property name="userServiceImpl" ref="userServiceImpl"></property>
+	</bean>
+	<bean name="userServiceImpl" class="cn.emagsoftware.dm.service.impl.UserServiceImpl"></bean>
+	
+
+</beans>

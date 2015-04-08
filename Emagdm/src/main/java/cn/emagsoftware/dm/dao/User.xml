@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.emagsoftware.dm.dao.UserMapper">
+
+	<resultMap type="User" id="user">
+		<id column="user_id" property="userID" />
+		<result column="loginname" property="loginName" />
+		<result column="username" property="username" />
+		<result column="password" property="password" />
+		<result column="user_rights" property="rights" />
+		<result column="status" property="status" />
+		<result column="last_login" property="lastLogin" />
+		<result column="role_id" property="roleID" />
+		<result column="module_id" property="moduleId"/>
+	</resultMap>
+
+
+	<select id="getUserList" resultType="java.util.List" resultMap="user">
+		select * from tb_user 
+	</select>
+
+	
+	<select id="getUserByName" parameterType="String" resultMap="user">
+		select * from tb_user where username=#{username}
+	</select>
+	
+
+
+
+</mapper>

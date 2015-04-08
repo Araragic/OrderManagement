@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd   
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd   
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd   
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/task  
+       http://www.springframework.org/schema/task/spring-task-3.0.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+	<!-- ①：对web包中的所有类进行扫描，以完成Bean创建和自动依赖注入的功能 不使用<context:annotation-config />的时候,包要配齐.使用的时候，下面这些可以不用写 -->
+	<context:component-scan base-package="cn.emagsoftware.dm.dao" />
+	<context:component-scan base-package="cn.emagsoftware.dm.service" />
+	<context:component-scan base-package="cn.emagsoftware.dm.controller" />
+	<!-- 据说使用autowired，要配置这个 -->
+	<bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
+	
+	
+	<!-- 注解风格的拦截器 ，此标签直接实现相面两个标签的全部功能 -->
+	<mvc:annotation-driven />
+	<!-- HandlerMapping接口的实现，用于把一个URL映射到具体的Controller类上 /> -->
+	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
+	<!-- HandlerAdapter接口的试下，用于把一个URL映射到对应Controller类的某个方法上/> --> 
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />
+		
+
+
+	<!-- 默认的视图解析器 在上边的解析错误时使用  -->
+	<bean id="ViewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	
+	<mvc:interceptors>
+    	<bean class="cn.emagsoftware.dm.interceptor.LoginHandleInterceptor"/>
+	</mvc:interceptors>
+		
+	
+	<!-- spring拦截请求是过滤这些静态资源映射 -->
+	<mvc:resources mapping="/avatars/**" location="/assets/avatars/" />
+	<mvc:resources mapping="/css/**" location="/assets/css/" />
+	<mvc:resources mapping="/font/**" location="/assets/font/" />
+	<mvc:resources mapping="/fonts/**" location="/assets/fonts/" />
+	<mvc:resources mapping="/images/**" location="/assets/images/" />
+	<mvc:resources mapping="/img/**" location="/assets/img/" />
+	<mvc:resources mapping="/js/**" location="/assets/js/" />
+	<mvc:default-servlet-handler/>
+
+</beans>

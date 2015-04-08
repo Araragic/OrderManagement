@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<!-- 在这里给实体类配置别名，在下面的映射的map里面可以直接使用别名 -->
+	<typeAliases>
+		<typeAlias alias="User" type="cn.emagsoftware.dm.bean.User" />
+		<typeAlias alias="Requirement" type="cn.emagsoftware.dm.bean.Requirement" />
+		<typeAlias alias="Schedule" type="cn.emagsoftware.dm.bean.Schedule" />
+	</typeAliases>
+
+	<!-- 映射map -->
+	<mappers>
+		<mapper resource="cn/emagsoftware/dm/dao/User.xml" />
+		<mapper resource="cn/emagsoftware/dm/dao/Requirement.xml" />
+		<mapper resource="cn/emagsoftware/dm/dao/Schedule.xml" />
+		<mapper resource="cn/emagsoftware/dm/dao/Upload.xml" />
+	</mappers>
+
+</configuration>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.emagsoftware.dm.dao.RequirementMapper">
+
+	<resultMap type="Requirement" id="requirement">
+		<id column="id" property="id" />
+		<result column="version" property="version" />
+		<result column="status" property="status" />
+		<result column="urgency" property="urgency" />
+		<result column="relate_hw" property="relate_hw" />
+		<result column="delete_flag" property="delete_flag" />
+		<result column="requirement_num" property="requirement_num" />
+		<result column="title" property="title" />
+		<result column="description" property="description" />
+		<result column="initiator" property="initiator" />
+		<result column="manager" property="manager" />
+		<result column="online_date" property="online_date" />
+		<result column="create_user" property="create_user" />
+		<result column="create_time" property="create_time" />
+		<result column="update_user" property="update_user" />
+		<result column="update_time" property="update_time" />
+		<result column="catchUrgency" property="catchUrgency" />
+		<result column="catchRelateHW" property="catchRelateHW" />
+		<result column="note" property="note" />
+	</resultMap>
+	
+	<insert id="insertRequirement" parameterType="Requirement">
+		insert into tb_requirement(requirement_num,version,create_time,create_user,description,initiator,manager,title,online_date,status,update_time,update_user,urgency,relate_hw,note) 
+		values
+		(#{requirement_num},#{version},#{create_time},#{create_user},#{description},#{initiator},#{manager},#{title},#{online_date},#{status},#{update_time},#{update_user},#{urgency},#{relate_hw},#{note})
+	</insert>
+
+	<update id="deleteRequirementById" parameterType="int">
+	    update tb_requirement set delete_flag = 1 where id = #{id}
+	</update>
+	
+	<update id="finRequirement" parameterType="Map">
+	    update tb_requirement set status=#{status},note=#{note},update_time=#{update_time},update_user=#{update_user} where id = #{id}
+	</update>
+	
+	<update id="updateRequirement" parameterType="Requirement">
+	    update tb_requirement 
+	    set 
+	    version=#{version},description=#{description},initiator=#{initiator},manager=#{manager},
+	    title=#{title},online_date=#{online_date},requirement_num=#{requirement_num},status=#{status},
+	    update_time=#{update_time},update_user=#{update_user},urgency=#{urgency},relate_hw=#{relate_hw},note=#{note}
+	    where id=#{id}
+	</update>
+	
+	<select id="getList"  resultMap="requirement">
+	    select * from tb_requirement ;
+	</select>
+	
+	<select id="queryRequirementByID" parameterType="String" resultMap="requirement">
+	    select * from tb_requirement where requirement_num = #{requirement_num}
+	</select>
+	
+	<select id="defaultSearch" parameterType="Map" resultMap="requirement">
+	   SELECT r.*,(select count(*) from tb_requirement r where r.delete_flag = 0 and r.status = '未完成') as totalRecords ,
+			(case r.urgency 
+	  			when '1' then '是' 
+      				else '否' end ) as catchUrgency,
+			(case r.relate_hw 
+	  			when '1' then '是' 
+      				else '否' end ) as catchRelateHW
+			FROM  tb_requirement r 
+			where r.delete_flag = 0 
+			and r.status = '未完成'
+			limit #{startPage} , #{rows};
+	</select>
+	
+	<select id="searchByConditions" parameterType="Map" resultMap="requirement">
+	    select r.* , 
+	    (case r.urgency 
+	  			when '1' then '是' 
+      				else '否' end ) as catchUrgency,
+			(case r.relate_hw 
+	  			when '1' then '是' 
+      				else '否' end ) as catchRelateHW
+	    from tb_requirement r  
+	    <if test="module > 0"> , tb_schedule s </if>
+	    where r.delete_flag = 0
+	    <if test="module == -1">  AND r.id not IN
+		(SELECT s.requirement_id from tb_schedule s where s.delete_flag = 0 GROUP BY s.requirement_id ) 
+		</if>
+	    <if test="requirement_num != ''"> AND r.requirement_num like '%${requirement_num}%' </if>
+	    <if test="manager != '' "> AND r.manager like '%${manager}%' </if>
+	    <if test="title != '' "> AND r.title like '%${title}%' </if>
+	    <if test="status != '' "> AND r.status = #{status} </if>
+	    <if test="module > 0"> AND s.requirement_id = r.id AND s.module_id = #{module} </if>
+	    <if test="leftDate != '' "> 
+	    	<if test="rightDate == '' "> 
+	    		AND  r.online_date &gt;= #{leftDate}
+	    	</if>
+	    </if>
+	    <if test="rightDate != '' "> 
+	    	<if test="leftDate == '' "> 
+	    		AND  r.online_date &lt;= #{rightDate}
+	    	</if>
+	    </if>
+	     <if test="rightDate != '' "> 
+	    	<if test="leftDate != '' "> 
+	    		AND  r.online_date &gt;= #{leftDate}  AND  r.online_date &lt;= #{rightDate}
+	    	</if>
+	    </if>
+	    group by r.id;
+	</select>
+	
+	
+	<select id="downloadByID" parameterType="int" resultType="String">
+		SELECT f.filename FROM tb_file f, tb_requirement r 
+		where f.requirement_num = r.requirement_num 
+		and  r.id = #{id};
+	</select>
+	
+	
+	<select id="queryRequirementByNumAndId" parameterType="Map" resultMap="requirement">
+		select ss.* from (
+	    		select * from tb_requirement where requirement_num = #{requirement_num}
+	    		) as ss where id !=#{id}
+	</select>
+	
+	<delete id="deleteFile" parameterType="String">
+	    delete from tb_file where filename = #{fileName}
+	</delete>
+	
+	<delete id="deleteFileByNum" parameterType="String">
+	    delete from tb_file where requirement_num = #{requirement_num}
+	</delete>
+	
+</mapper>

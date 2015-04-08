@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.emagsoftware.dm.dao.UploadMapper">
+    <select id="selectFileByName" parameterType="String" resultType="int">
+	    select count(filename) from tb_file where filename = #{fileName}
+	</select>
+	
+	<insert id="insertFileName" parameterType="Map">
+	    insert into tb_file (filename,requirement_num) 
+	    values
+	    (#{fileName},#{requirement_num})
+	</insert>
+	
+	<update id="updateRequirement_num" parameterType="Map">
+	    update tb_file set requirement_num = #{requirement_num} where filename = #{fileName}
+	</update>
+</mapper>

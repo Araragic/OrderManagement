@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.emagsoftware.dm.dao.ScheduleMapper">
+
+	<resultMap type="Schedule" id="schedule">
+		<id column="id" property="id" />
+		<result column="version" property="version" />
+		<result column="status" property="status" />
+		<result column="requirement_id" property="requirement_id" />
+		<result column="module_id" property="module_id" />
+		<result column="online_date" property="online_date" />
+		<result column="create_user" property="create_user" />
+		<result column="create_time" property="create_time" />
+		<result column="update_user" property="update_user" />
+		<result column="update_time" property="update_time" />
+		<result column="schedule_num" property="schedule_num" />
+		<result column="delete_flag" property="delete_flag" />
+		<result column="moduleName" property="moduleName" />
+	</resultMap>
+	
+	<select id="getScheduleListByReID" parameterType="int" resultMap="schedule">
+	select 
+	s.id,s.version,s.status,s.module_id,m.name as moduleName,s.create_user,s.create_time,s.update_user,s.update_time,s.schedule_num,s.online_date
+	from 
+	tb_schedule s,tb_requirement r,tb_system_module m
+	where s.delete_flag = 0 and 
+	s.requirement_id = r.id and s.module_id = m.id and r.id = #{id} ;
+	</select>
+	
+	<insert id="insertSchedule" parameterType="Schedule">
+		insert into tb_schedule(version,create_time,create_user,module_id,online_date,requirement_id,status,update_time,update_user,schedule_num,delete_flag) 
+		values
+		(#{version},#{create_time},#{create_user},#{module_id},#{online_date},#{requirement_id},#{status},#{update_time},#{update_user},#{schedule_num},#{delete_flag})
+	</insert>
+	
+	<update id="deleteSchedule" parameterType="int">
+	    update tb_schedule set delete_flag = 1 where id = #{id}
+	</update>
+	
+	<update id="updateSchedule" parameterType="Schedule">
+	    update tb_schedule 
+	    set version=#{version},module_id=#{module_id},
+	    	online_date=#{online_date},requirement_id=#{requirement_id},
+	        status=#{status},update_time=#{update_time},
+	        update_user=#{update_user},schedule_num=#{schedule_num}
+	    where id = #{id}
+	</update>
+	
+	<update id="deleteScheduleBy_ReId" parameterType="int">
+	    update tb_schedule set delete_flag = 1 where requirement_id = #{requirement_id}
+	</update>
+	
+	<update id="finSchedule" parameterType="Map">
+	    update tb_schedule set status=#{status},update_time=#{update_time},update_user=#{update_user} where id = #{id}
+	</update>
+	
+	<select id="getScheduleByNum" parameterType="String" resultMap="schedule">
+	    select * from tb_schedule where schedule_num = #{schedule_num}
+	</select>
+	
+	<select id="queryScheduleByNumAndId" parameterType="Map" resultMap="schedule">
+		select tt.* from (
+	    	select * from tb_schedule where schedule_num = #{schedule_num}
+	    ) as tt where id!=#{id}
+	</select>
+	
+	<select id="getModuleIDByScheduleID" parameterType="int" resultType="int">
+		select module_id from tb_schedule  where id = #{id} 
+	</select>
+	
+</mapper>
